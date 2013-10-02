@@ -1,6 +1,5 @@
 //
 //  UIColor+colorWithHex.h
-//  myVOD
 //
 //  Created by Peter Wong on 24/9/13.
 //  Copyright (c) 2013 Ted Cheng. All rights reserved.

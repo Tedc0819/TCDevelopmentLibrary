@@ -1,6 +1,5 @@
 //
 //  ActivityIndicatorManager.h
-//  TVBZone
 //
 //  Created by Ted Cheng on 4/1/13.
 //  Copyright (c) 2013 Ted Cheng. All rights reserved.

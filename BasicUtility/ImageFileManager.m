@@ -1,6 +1,5 @@
 //
 //  ImageFileManager.m
-//  SimpleTab
 //
 //  Created by Ted Cheng on 19/11/12.
 //  Copyright (c) 2012 Ted Cheng. All rights reserved.
@@ -18,7 +17,7 @@ static NSArray *_dirContents;
 + (dispatch_queue_t)ImageFileManagerQueue
 {
     if (!_imageFileManagerQueue) {
-        _imageFileManagerQueue = dispatch_queue_create("com.tvb.fileQueue", DISPATCH_QUEUE_SERIAL);
+        _imageFileManagerQueue = dispatch_queue_create("com.imageFileManager.fileQueue", DISPATCH_QUEUE_SERIAL);
     }
     return _imageFileManagerQueue;
 }

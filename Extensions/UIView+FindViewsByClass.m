@@ -1,6 +1,5 @@
 //
 //  UIView+FindViewsByClass.m
-//  myVOD
 //
 //  Created by Peter Wong on 22/8/13.
 //  Copyright (c) 2013 Ted Cheng. All rights reserved.

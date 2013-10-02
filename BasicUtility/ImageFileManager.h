@@ -1,29 +1,9 @@
 //
 //  ImageFileManager.h
-//  SimpleTab
 //
 //  Created by Ted Cheng on 19/11/12.
 //  Copyright (c) 2012 Ted Cheng. All rights reserved.
 //
-
-/* Model Description:
-   Principle: To handle image I/O and caching
- 
-   How it is used (TVBZone):
-   Given that:
-   1. every images will have their own keys.
-   2. these keys play as the identities of the images
- 
-   When a magazine needs a images (e.g pages, thumbnails),
-   1. if imageCacheDict([ImageFileManager imageCacheDict) has that => get from cache
-   2. if no, check if the images exist in local disk (+ (BOOL )isImageExistWithName:(NSString *) _name;)
-   3. if yes, + (void)loadImageWithName:(NSString *) _name completion: (void (^)())completion;
-   4. if no, send request and save the data to local disk and map it to cache it 
- 
- 
-   What can be improved:
-   1. cache the file list in the dir
-*/
  
 #import <Foundation/Foundation.h>
 

@@ -1,6 +1,5 @@
 //
 //  ImageCache.m
-//  mytvHD
 //
 //  Created by Ted Cheng on 18/3/13.
 //  Copyright (c) 2013 Ted Cheng. All rights reserved.

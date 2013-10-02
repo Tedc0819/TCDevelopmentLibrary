@@ -1,6 +1,5 @@
 //
 //  TCRequest.h
-//  iOSUtility
 //
 //  Created by Ted Cheng on 13/8/13.
 //  Copyright (c) 2013 Ted Cheng. All rights reserved.
