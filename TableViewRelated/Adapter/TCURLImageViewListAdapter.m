@@ -9,6 +9,7 @@
 #import "TCURLImageViewListAdapter.h"
 #import "ImageCache.h"
 #define kImageViewTag 11111
+#define DefaultImage @""
 
 @implementation TCURLImageViewListAdapter
 - (id)init

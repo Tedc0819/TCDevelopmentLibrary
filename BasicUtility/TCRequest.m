@@ -7,6 +7,7 @@
 
 #import "TCRequest.h"
 #import "ActivityIndicatorManager.h"
+#import "Extension.h"
 
 #define kRequestTimeOut 60
 

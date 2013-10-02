@@ -7,6 +7,7 @@
 
 #import "TCNavigationBarBannerNoticeView.h"
 #import "TCNoticeManager.h"
+#import "Extension.h"
 
 @interface TCNavigationBarBannerNoticeView()
 

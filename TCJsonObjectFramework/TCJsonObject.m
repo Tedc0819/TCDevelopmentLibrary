@@ -7,6 +7,7 @@
 //
 
 #import "TCJsonObject.h"
+#import "Extension.h"
 
 @implementation TCJsonObject
 
