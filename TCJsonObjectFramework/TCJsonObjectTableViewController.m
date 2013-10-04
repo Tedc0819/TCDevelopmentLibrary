@@ -7,8 +7,15 @@
 //
 
 #import "TCJsonObjectTableViewController.h"
+#import "TCHorizontalTableView.h"
+#import "TCHorizontalViewListAdapter.h"
+#import "Extension.h"
 
-@interface TCJsonObjectTableViewController ()
+@interface TCJsonObjectTableViewController()<TCSegmentingManagerDataSource>
+
+@property (nonatomic, strong) TCHorizontalTableView *headerView;
+@property (nonatomic, strong) TCHorizontalViewListAdapter *headerViewAdapter;
+@property (nonatomic, strong) NSArray *segmentedButtons;
 
 @end
 
@@ -18,8 +25,8 @@
 {
     self = [super initWithStyle:style];
     if (self) {
-        // Custom initialization
-        self.segmentingManager = [TCSegmentingManager alloc] init
+        self.segmentingManager = [[TCSegmentingManager alloc] init];
+        [self.segmentingManager setDatasource:self];
     }
     return self;
 }
@@ -27,7 +34,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+    [self.tableView setTableHeaderView:self.headerView];
+    [self.segmentingManager setup];
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
@@ -45,24 +53,23 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-#warning Potentially incomplete method implementation.
-    // Return the number of sections.
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return 0;
+    return 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    // Configure the cell...
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        [cell.textLabel setText:@"halo"];
+    }
     
     return cell;
 }
@@ -117,5 +124,55 @@
 }
 
  */
+
+- (TCHorizontalTableView *)headerView
+{
+    if (!_headerView) {
+        _headerView = [[TCHorizontalTableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50)];
+        [_headerView setBackgroundColor:[UIColor greenColor]];
+        [_headerView setScrollEnabled:YES];
+        [self.headerViewAdapter handleTableView:_headerView];
+    }
+    return _headerView;
+}
+
+- (TCHorizontalViewListAdapter *)headerViewAdapter
+{
+    if (!_headerViewAdapter) {
+        _headerViewAdapter = [[TCHorizontalViewListAdapter alloc] init];
+        [_headerViewAdapter setItems:self.segmentedButtons];
+        [_headerViewAdapter setNumberOfCellDisplay:3.5];
+    }
+    return _headerViewAdapter;
+}
+
+- (NSArray *)segmentedButtons
+{
+    if (!_segmentedButtons) {
+        NSMutableArray *buttons = [[NSMutableArray alloc] init];
+        
+        for (NSInteger i = 0; i < 5 ; i++) {
+            UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
+            [button setBackgroundColor:[UIColor redColor] forState:UIControlStateSelected];
+            [button setBackgroundColor:[UIColor blueColor] forState:UIControlStateNormal];
+            [button setTitle:@(i).stringValue forState:UIControlStateNormal];
+            [buttons addObject:button];
+        }
+        _segmentedButtons = buttons;
+    }
+    return _segmentedButtons;
+}
+
+#pragma mark - segmenting manager delegate 
+- (NSUInteger)segmentingManagerShouldHaveNumberOfSegments:(TCSegmentingManager *)segmentingManager
+{
+    return self.segmentedButtons.count;
+}
+
+- (UIButton *)segmentingManager:(TCSegmentingManager *)segmentingManager buttonAtIndex:(NSUInteger)index
+{
+
+    return self.segmentedButtons[index];
+}
 
 @end

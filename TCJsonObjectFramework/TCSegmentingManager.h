@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "TCSegmentedResourcesManager.h"
 #import "TCSegmentedControlButtonManager.h"
 
 @protocol TCSegmentingManagerDataSource;
@@ -15,10 +14,9 @@
 @interface TCSegmentingManager : NSObject
 
 @property (nonatomic, strong) TCSegmentedControlButtonManager *controlButtonManager;
-@property (nonatomic, strong) TCSegmentedResourcesManager *resourceManager;
 @property (nonatomic, weak) id<TCSegmentingManagerDataSource> datasource;
 
-- (id)initWithNumberOfSegments:(NSUInteger)numberOfSegments;
+- (void)setup;
 
 @end
 
@@ -26,8 +24,7 @@
 
 @required
 
-- (NSUInteger)segmentingManagerShouldHaveNumberOfSegments:(TCSegmentedResourcesManager *)segmentingManager;
-- (UIButton *)segmentingManager:(TCSegmentedResourcesManager *)segmentingManager buttonAtIndex:(NSUInteger) index;
-
+- (NSUInteger)segmentingManagerShouldHaveNumberOfSegments:(TCSegmentingManager *)segmentingManager;
+- (UIButton *)segmentingManager:(TCSegmentingManager *)segmentingManager buttonAtIndex:(NSUInteger) index;
 
 @end

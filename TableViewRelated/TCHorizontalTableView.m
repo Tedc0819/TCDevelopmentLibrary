@@ -21,7 +21,6 @@
         [self setTransform:CGAffineTransformMakeRotation( 3 * M_PI / 2)];
         [self setFrame:frame];
         [self setShowsVerticalScrollIndicator:NO];
-        [self setBackgroundColor:[UIColor blueColor]];
     }
     return self;
 }
