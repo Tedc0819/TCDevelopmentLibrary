@@ -82,7 +82,8 @@
     }
     [cell setToDefaultView];
     [cell updateWithJsonObject:object];
-    [ImageCache loadImageForView:cell localOnly:YES];
+    if (self.tableView.dragging == NO && self.tableView.decelerating == NO) [ImageCache loadImageForView:cell localOnly:YES];
+    
     return cell;
 }
 
