@@ -11,39 +11,50 @@
 @interface TCSegmentingManager()
 
 @property (nonatomic, strong) NSMutableArray *resourceArrays;
+@property (nonatomic, strong) NSArray *segmentedControlButtons;
 
 @end
 
 @implementation TCSegmentingManager
 
-- (id)init
+- (id)initWithButtons:(NSArray *)buttons
 {
-    self = [super init];
+    self = [self init];
     if (self) {
         self.controlButtonManager = [[TCSegmentedControlButtonManager alloc] init];
+        [self.controlButtonManager setButtons:buttons];
+        self.resourceArrays = [self emptyResourceArrays];
     }
     return self;
 }
 
-- (void)setup
+- (void)setItems:(NSArray *)items ForIndex:(NSUInteger)index
 {
-    [self.controlButtonManager setButtons:[self controlButtonManagerButtons]];
+    if (index >= [self numberOfSegment]) return;
+    [self.resourceArrays setObject:items atIndexedSubscript:index];
+}
+
+#pragma mark - getter method
+
+- (NSArray *)currentItems
+{
+    return self.resourceArrays[self.controlButtonManager.currentIndex];
 }
 
 #pragma mark - data getter from datasource
 
 - (NSUInteger)numberOfSegment
 {
-    return [self.datasource segmentingManagerShouldHaveNumberOfSegments:self];
+    return self.controlButtonManager.buttons.count ? self.controlButtonManager.buttons.count : 1;
 }
 
-- (NSArray *)controlButtonManagerButtons
+- (NSMutableArray *)emptyResourceArrays
 {
-    NSMutableArray *buttons = [[NSMutableArray alloc] init];
+    NSMutableArray *itemArrays = [[NSMutableArray alloc] init];
     for (int i = 0; i < [self numberOfSegment]; i++) {
-        [buttons addObject:[self.datasource segmentingManager:self buttonAtIndex:i]];
+        [itemArrays addObject:@[]];
     }
-    return buttons.copy;
+    return itemArrays;
 }
 
 @end

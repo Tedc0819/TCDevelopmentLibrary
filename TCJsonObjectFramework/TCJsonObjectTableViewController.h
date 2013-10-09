@@ -11,6 +11,13 @@
 
 @interface TCJsonObjectTableViewController : UITableViewController
 
+//SegmentedControlButtonSetting
 @property (nonatomic, strong) TCSegmentingManager *segmentingManager;
 
+- (void)updateImageDownLoadRequest;
+
+- (CGFloat)numberOfButtonDisplay;
+- (NSArray *)segmentedControlButtons;
+- (BOOL)segmentedControlButtonsShouldShow;
+- (NSString *)cellClassStringForJsonObjectClassString:(NSString *)classString;
 @end

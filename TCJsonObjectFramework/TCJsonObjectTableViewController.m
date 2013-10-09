@@ -9,9 +9,11 @@
 #import "TCJsonObjectTableViewController.h"
 #import "TCHorizontalTableView.h"
 #import "TCHorizontalViewListAdapter.h"
+#import "TCJsonObject.h"
+#import "TCJsonObjectTableViewCell.h"
 #import "Extension.h"
 
-@interface TCJsonObjectTableViewController()<TCSegmentingManagerDataSource>
+@interface TCJsonObjectTableViewController()<TCSegmentedControlButtonManagerDelegate>
 
 @property (nonatomic, strong) TCHorizontalTableView *headerView;
 @property (nonatomic, strong) TCHorizontalViewListAdapter *headerViewAdapter;
@@ -25,8 +27,8 @@
 {
     self = [super initWithStyle:style];
     if (self) {
-        self.segmentingManager = [[TCSegmentingManager alloc] init];
-        [self.segmentingManager setDatasource:self];
+        self.segmentingManager = [[TCSegmentingManager alloc] initWithButtons:self.segmentedButtons];
+        [self.segmentingManager.controlButtonManager setDelegate:self];
     }
     return self;
 }
@@ -34,13 +36,18 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self.tableView setTableHeaderView:self.headerView];
-    [self.segmentingManager setup];
+    if ([self segmentedControlButtonsShouldShow]) [self.tableView setTableHeaderView:self.headerView];
+
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
 }
 
 - (void)didReceiveMemoryWarning
@@ -58,19 +65,24 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 1;
+    return self.segmentingManager.currentItems.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    TCJsonObject *object = self.segmentingManager.currentItems[indexPath.row];
+    NSString *cellClassString = [self cellClassStringForJsonObjectClassString:NSStringFromClass([object class])];
+    Class cellClass = NSClassFromString(cellClassString);
+    
+    NSString *CellIdentifier = cellClassString;
+    TCJsonObjectTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
     if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-        [cell.textLabel setText:@"halo"];
+        cell = [[cellClass alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
-    
+    [cell setToDefaultView];
+    [cell updateWithJsonObject:object];
+    [ImageCache loadImageForView:cell localOnly:YES];
     return cell;
 }
 
@@ -125,11 +137,11 @@
 
  */
 
+#pragma mark - standard flow
 - (TCHorizontalTableView *)headerView
 {
     if (!_headerView) {
-        _headerView = [[TCHorizontalTableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50)];
-        [_headerView setBackgroundColor:[UIColor greenColor]];
+        _headerView = [[TCHorizontalTableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50 )];
         [_headerView setScrollEnabled:YES];
         [self.headerViewAdapter handleTableView:_headerView];
     }
@@ -140,8 +152,8 @@
 {
     if (!_headerViewAdapter) {
         _headerViewAdapter = [[TCHorizontalViewListAdapter alloc] init];
+        [_headerViewAdapter setNumberOfCellDisplay:[self numberOfButtonDisplay]];
         [_headerViewAdapter setItems:self.segmentedButtons];
-        [_headerViewAdapter setNumberOfCellDisplay:3.5];
     }
     return _headerViewAdapter;
 }
@@ -149,30 +161,64 @@
 - (NSArray *)segmentedButtons
 {
     if (!_segmentedButtons) {
-        NSMutableArray *buttons = [[NSMutableArray alloc] init];
-        
-        for (NSInteger i = 0; i < 5 ; i++) {
-            UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
-            [button setBackgroundColor:[UIColor redColor] forState:UIControlStateSelected];
-            [button setBackgroundColor:[UIColor blueColor] forState:UIControlStateNormal];
-            [button setTitle:@(i).stringValue forState:UIControlStateNormal];
-            [buttons addObject:button];
-        }
-        _segmentedButtons = buttons;
+        _segmentedButtons = [self segmentedControlButtons];
     }
     return _segmentedButtons;
 }
 
-#pragma mark - segmenting manager delegate 
-- (NSUInteger)segmentingManagerShouldHaveNumberOfSegments:(TCSegmentingManager *)segmentingManager
+#pragma mark - lazy Loading 
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    return self.segmentedButtons.count;
+    [self updateImageDownLoadRequest];
 }
 
-- (UIButton *)segmentingManager:(TCSegmentingManager *)segmentingManager buttonAtIndex:(NSUInteger)index
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
+    if (!decelerate) {
+        [self updateImageDownLoadRequest];
+    }
+}
 
-    return self.segmentedButtons[index];
+- (void)updateImageDownLoadRequest
+{
+    NSArray *visiblePaths = [self.tableView indexPathsForVisibleRows];
+    NSMutableArray *mutablePaths = [NSMutableArray arrayWithArray:visiblePaths];
+    
+    for (NSIndexPath *indexPath in mutablePaths)
+    {
+        TCJsonObjectTableViewCell *cell = (TCJsonObjectTableViewCell *)[self.tableView cellForRowAtIndexPath:indexPath];
+        [ImageCache loadImageForView:cell localOnly:NO];
+    }
+}
+
+
+#pragma mark - To Be Override
+
+- (BOOL)segmentedControlButtonsShouldShow
+{
+    return YES;
+}
+
+- (CGFloat)numberOfButtonDisplay
+{
+    return 1;
+}
+
+- (NSArray *)segmentedControlButtons
+{
+    return nil;
+}
+
+- (NSString *)cellClassStringForJsonObjectClassString:(NSString *)classString
+{
+    return @"TCJsonObjectTableViewCell";
+}
+
+#pragma mark - segmented control Button Delegate
+- (void)segmentedControlButtonManager:(TCSegmentedControlButtonManager *)manager DidChangeCurrentIndexToButton:(UIButton *)button
+{
+    [self.tableView reloadData];
 }
 
 @end

@@ -12,6 +12,16 @@
 
 @implementation ImageCache
 
++ (NSMutableDictionary *)currentProcessRecord
+{
+    static NSMutableDictionary *_currentProcessRecord;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _currentProcessRecord = [[NSMutableDictionary alloc] init];
+    });
+    return _currentProcessRecord;
+}
+
 + (void)loadImageForURL:(NSURL *) url LocalOnly:(BOOL) localOnly completion:(void(^)(UIImage *image))completion
 {
     if ((!url) || ([url class] != [NSURL class])){
@@ -37,9 +47,30 @@
             }else {
                 completion(nil);
             }
-            
         }
     }
+}
+
++ (void)loadImageForURL:(NSURL *) url ToImageView:(UIImageView *)imageView LocalOnly:(BOOL) localOnly completion:(void(^)(UIImage *image))completion
+{
+    NSString *imageViewIDString = @(imageView.hash).stringValue;
+    [[ImageCache currentProcessRecord] setValue:url.absoluteString forKey:imageViewIDString];
+    [ImageCache loadImageForURL:url LocalOnly:localOnly completion:^(UIImage *image) {
+        if ([[ImageCache currentProcessRecord][imageViewIDString] isEqualToString:url.absoluteString]) {
+            if (image) {
+                [imageView setImage:image];
+            }
+            [[ImageCache currentProcessRecord]removeObjectForKey:imageViewIDString];
+        }
+        completion(image);
+    }];
+}
+
++ (void)loadImageForView:(UIView<ImageCacheLoadingProtocol> *)view localOnly:(BOOL)localOnly
+{
+    [view.lazyLoadingImageViews enumerateObjectsUsingBlock:^(UIImageView *imageView, NSUInteger idx, BOOL *stop) {
+        [ImageCache loadImageForURL:view.lazyLoadingImageURLs[idx] ToImageView:imageView LocalOnly:localOnly completion:^(UIImage *image) {}];
+    }];
 }
 
 @end

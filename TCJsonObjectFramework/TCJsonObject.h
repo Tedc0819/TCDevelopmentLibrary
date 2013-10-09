@@ -17,7 +17,14 @@
 
 + (id)objectFromDictionary:(NSDictionary *) dict;
 + (NSArray *)jsonObjectsFromRawArray:(NSArray *)rawArray;
+- (NSDictionary *)mappingDictionary;
+- (NSArray *)descriptionProperties;
 
+- (void)getPropertyValuesFromDictionary:(NSDictionary *)dict;
+- (NSURL *)URLFromString:(NSString *) string;
+- (TCJsonObject *)parsingOwningObjectWithKeyPath:(NSArray *)keyPath AsClass:(NSString *) classStr FromJsonObjectDictionary:(NSDictionary *)dict;
+
+//request related
 + (void)getObjectsFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath WithParamsType:(TCRequestParamsType)paramsType WithMethod:(TCRequestMethod)method WithParams:(NSDictionary *)params Completion:(void (^)(NSArray *objects))completion;
 + (void)getObjectsFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath Completion: (void(^)(NSArray *objects)) completion;
 + (void)getObjectFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath headers:(NSDictionary *)headers Completion: (void(^)(TCJsonObject *object)) completion;
@@ -25,11 +32,5 @@
 
 //+ (void)deleteObjects:(NSArray *)objects ByURL:(NSURL *)url ResultKeyPath:(NSArray *)keyPath Completion:(void(^)(id object)) completion;
 //+ (void)updateObject:(NSJsonObject *)object ByURL:(NSURL *)url ResultKeyPath:(NSArray *)keyPath Completion:(void(^)(id object)) completion;
-- (NSDictionary *)mappingDictionary;
-- (NSArray *)descriptionProperties;
-
-- (void)getPropertyValuesFromDictionary:(NSDictionary *)dict;
-- (NSURL *)URLFromString:(NSString *) string;
-- (TCJsonObject *)parsingOwningObjectWithKeyPath:(NSArray *)keyPath AsClass:(NSString *) classStr FromJsonObjectDictionary:(NSDictionary *)dict;
 
 @end
