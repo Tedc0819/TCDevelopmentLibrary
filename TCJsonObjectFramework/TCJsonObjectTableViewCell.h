@@ -14,6 +14,7 @@
 
 @property (nonatomic, weak) TCJsonObject *jsonObject;
 
+//TO BE OVERRIDE
 - (void)setToDefaultView;
 - (void)updateWithJsonObject:(TCJsonObject *)jsonObject;
 

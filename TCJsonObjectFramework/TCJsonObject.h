@@ -9,10 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "TCRequest.h"
 
-//#define NSJsonObjectShouldLogRequest
+#define NSJsonObjectShouldLogRequest
 
 @interface TCJsonObject : NSObject
 
+@property (nonatomic, strong) NSString *objID;
 @property (nonatomic, strong) NSDictionary *JSONDict;
 
 + (id)objectFromDictionary:(NSDictionary *) dict;

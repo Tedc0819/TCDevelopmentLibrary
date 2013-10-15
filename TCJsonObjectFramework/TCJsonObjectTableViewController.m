@@ -9,8 +9,6 @@
 #import "TCJsonObjectTableViewController.h"
 #import "TCHorizontalTableView.h"
 #import "TCHorizontalViewListAdapter.h"
-#import "TCJsonObject.h"
-#import "TCJsonObjectTableViewCell.h"
 #import "Extension.h"
 
 @interface TCJsonObjectTableViewController()<TCSegmentedControlButtonManagerDelegate>
@@ -27,8 +25,7 @@
 {
     self = [super initWithStyle:style];
     if (self) {
-        self.segmentingManager = [[TCSegmentingManager alloc] initWithButtons:self.segmentedButtons];
-        [self.segmentingManager.controlButtonManager setDelegate:self];
+
     }
     return self;
 }
@@ -36,6 +33,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.segmentingManager = [[TCSegmentingManager alloc] initWithButtons:self.segmentedButtons];
+    [self.segmentingManager.controlButtonManager setDelegate:self];
     if ([self segmentedControlButtonsShouldShow]) [self.tableView setTableHeaderView:self.headerView];
 
     // Uncomment the following line to preserve selection between presentations.
@@ -142,8 +142,9 @@
 - (TCHorizontalTableView *)headerView
 {
     if (!_headerView) {
-        _headerView = [[TCHorizontalTableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50 )];
+        _headerView = [[TCHorizontalTableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.segmentedControlsHeight)];
         [_headerView setScrollEnabled:YES];
+        [_headerView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
         [self.headerViewAdapter handleTableView:_headerView];
     }
     return _headerView;
@@ -195,6 +196,10 @@
 
 
 #pragma mark - To Be Override
+- (CGFloat)segmentedControlsHeight
+{
+    return 50;
+}
 
 - (BOOL)segmentedControlButtonsShouldShow
 {
