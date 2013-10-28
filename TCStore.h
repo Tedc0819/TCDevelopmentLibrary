@@ -27,10 +27,13 @@ typedef enum {
 @interface TCStore : NSObject
 
 @property (nonatomic, assign) TCStoreType *storeType;
+@property (nonatomic, strong) NSString *storeKey;
 
 - (void)storeObject:(id<TCStorable>)storable;
-- (NSDictionary *)loadObjectDictionaryWithKey:(NSString *)key;
+//- (NSDictionary *)loadObjectDictionaryWithKey:(NSString *)key;
+- (id<TCStorable>)objectWithKey:(NSString *)key;
 - (void)removeObjectWithKey:(NSString *)key;
 - (void)clearAllObject;
+- (BOOL)isObjectWithKeyExist:(NSString *)key;
 
 @end

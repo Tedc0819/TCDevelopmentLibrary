@@ -61,4 +61,26 @@
     [store removeObjectWithKey:key];
 }
 
+- (id<TCStorable>)objectWithKey:(NSString *)key inStoreWithKey:(NSString *)storeKey
+{
+    TCStore *store = [self storeWithKey:storeKey];
+    return [store objectWithKey:key];
+}
+- (BOOL)isObjectWithKey:(NSString *)key inStoreWithKey:(NSString *)storeKey
+{
+    TCStore *store = [self storeWithKey:storeKey];
+    return [store isObjectWithKeyExist:key];
+}
+
+- (NSString *)description
+{
+    NSMutableString *description = [NSString stringWithFormat:@"StoreManagerStatus:\nStoreDictionary:%@\n", self.storeDictionary].mutableCopy;
+    
+    [self.storeDictionary enumerateKeysAndObjectsUsingBlock:^(id key, TCStore *store, BOOL *stop) {
+        [description appendString:[store description]];
+    }];
+    
+    return description.copy;
+}
+
 @end

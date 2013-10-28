@@ -60,7 +60,6 @@
 #endif    
 }
 
-
 + (void)dismissAllIndicator
 {
 #ifdef ActivityIndicatorManagerShouldLog

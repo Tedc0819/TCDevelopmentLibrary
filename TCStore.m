@@ -18,10 +18,15 @@
 
 - (void)storeObject:(id<TCStorable>)storable
 {
-    [self.storeDict setObject:storable.storableContentDictionary forKey:storable.storableKey];
+    [self.storeDict setObject:storable forKey:storable.storableKey];
 }
 
-- (NSDictionary *)loadObjectDictionaryWithKey:(NSString *)key;
+//- (NSDictionary *)loadObjectDictionaryWithKey:(NSString *)key;
+//{
+//    return [self.storeDict objectForKey:key];
+//}
+
+- (id<TCStorable>)objectWithKey:(NSString *)key
 {
     return [self.storeDict objectForKey:key];
 }
@@ -34,6 +39,17 @@
 - (void)clearAllObject
 {
     [self.storeDict removeAllObjects];
+}
+
+- (BOOL)isObjectWithKeyExist:(NSString *)key
+{
+    return [self.storeDict objectForKey:key] ? YES : NO;
+}
+
+- (NSString *)description
+{
+    NSString *description = [NSString stringWithFormat:@"%@: %@\n",self.storeKey, self.storeDict];
+    return description;
 }
 
 @end

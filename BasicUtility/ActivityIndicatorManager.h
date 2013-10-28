@@ -13,13 +13,9 @@
 @interface ActivityIndicatorManager : NSObject
 
 + (void)showIndicatorForActivity:(NSString *) activity;
-
 + (void)dismissIndicatorForActivity:(NSString *) activity;
-
 + (void)dismissAllIndicator;
-
 + (NSMutableArray *)currentActivities;
-
 + (BOOL)isActivityExist:(NSString *) activity;
 
 @end

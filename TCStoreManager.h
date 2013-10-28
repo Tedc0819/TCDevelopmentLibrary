@@ -19,5 +19,6 @@
 - (void)storeObject:(id<TCStorable>)storable ToStoreWithKey:(NSString *)storeKey;
 - (void)removeObjectWithKey:(NSString *)key ToStoreWithKey:(NSString *)storeKey;
 - (id<TCStorable>)objectWithKey:(NSString *)key inStoreWithKey:(NSString *)storeKey;
+- (BOOL)isObjectWithKey:(NSString *)key inStoreWithKey:(NSString *)storeKey;
 
 @end
