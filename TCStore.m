@@ -16,6 +16,14 @@
 
 @implementation TCStore
 
+- (NSMutableDictionary *)storeDict
+{
+    if (!_storeDict) {
+        _storeDict = [[NSMutableDictionary alloc] init];
+    }
+    return _storeDict;
+}
+
 - (void)storeObject:(id<TCStorable>)storable
 {
     [self.storeDict setObject:storable forKey:storable.storableKey];

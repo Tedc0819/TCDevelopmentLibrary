@@ -38,6 +38,7 @@
     if (!store) {
         store = [[TCStore alloc] init];
         [self.storeDictionary setObject:store forKey:key];
+        store.storeKey = key;
     }
     return store;
 }
@@ -74,7 +75,7 @@
 
 - (NSString *)description
 {
-    NSMutableString *description = [NSString stringWithFormat:@"StoreManagerStatus:\nStoreDictionary:%@\n", self.storeDictionary].mutableCopy;
+    NSMutableString *description = [NSString stringWithFormat:@"StoreManagerStatus:\nStores:%@\n", self.storeDictionary.allKeys].mutableCopy;
     
     [self.storeDictionary enumerateKeysAndObjectsUsingBlock:^(id key, TCStore *store, BOOL *stop) {
         [description appendString:[store description]];
