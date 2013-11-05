@@ -52,35 +52,66 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-//        [cell setSelected:YES];
-//        [self.tableView scrollToNearestSelectedRowAtScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+        [cell setSelected:YES];
+        [self.tableView scrollToNearestSelectedRowAtScrollPosition:UITableViewScrollPositionMiddle animated:YES];
 //        [cell setSelected:NO];
-//        if ([self.delegate respondsToSelector:@selector(tableView:WithAdapter:didSelectItem:ItemIndex:)]) {
-//            int itemIndex = [self itemIndexWithIndexPath:indexPath];
-//            [self.delegate tableView:self.tableView WithAdapter:self didSelectItem:[self.items objectAtIndex:itemIndex] ItemIndex:itemIndex];
-//        }
+        if ([self.delegate respondsToSelector:@selector(tableView:WithAdapter:didSelectItem:ItemIndex:)]) {
+            [self.delegate tableView:self.tableView WithAdapter:self didSelectItem:self.items[indexPath.row] ItemIndex:indexPath.row];
+        }
 }
 
-#pragma mark - getter method
+- (void)scrollToIndex:(NSUInteger)index setSelected:(BOOL)selected animated:(BOOL)animated
+{
+    [self deselectCell];
+    
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+    [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:animated];
+
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    [cell setSelected:YES];
+
+}
 
 - (void)scrollToNextPageWithAnimation:(BOOL)animated
 {
     NSIndexPath *indexPath = [self validIndexPathNearToCenter];
-    NSIndexPath *desiredIndexPath = [NSIndexPath indexPathForRow:indexPath.row + self.numberOfCellDisplay inSection:0];
     
-    if (desiredIndexPath.row > self.items.count - 1) return;
+    NSUInteger desiredRow = indexPath.row + self.numberOfCellDisplay;
+    NSUInteger maxNumber = self.items.count - 1;
+    
+    if (desiredRow > maxNumber) {
+        desiredRow = maxNumber;
+    }
+    
+    NSIndexPath *desiredIndexPath = [NSIndexPath indexPathForRow:desiredRow inSection:0];
     [self.tableView scrollToRowAtIndexPath:desiredIndexPath atScrollPosition:UITableViewScrollPositionMiddle animated:animated];
 }
 
 - (void)scrollToPreviousPageWithAnimation:(BOOL)animated
 {
     NSIndexPath *indexPath = [self validIndexPathNearToCenter];
-    NSIndexPath *desiredIndexPath = [NSIndexPath indexPathForRow:indexPath.row - self.numberOfCellDisplay inSection:0];
     
-    if (desiredIndexPath.row < 0) return;
+    NSUInteger desiredRow = indexPath.row - self.numberOfCellDisplay;
+    NSUInteger minNumber = 0;
+    
+    if (desiredRow < minNumber) {
+        desiredRow = minNumber;
+    }
+    
+    NSIndexPath *desiredIndexPath = [NSIndexPath indexPathForRow:desiredRow inSection:0];
     [self.tableView scrollToRowAtIndexPath:desiredIndexPath atScrollPosition:UITableViewScrollPositionMiddle animated:animated];
 }
+
+- (void)deselectCell
+{
+    NSArray *indexPaths = [self.tableView indexPathsForSelectedRows];
+    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+        [self.tableView deselectRowAtIndexPath:indexPath animated:NO];
+    }];
+}
+
+#pragma mark - getter method
 
 - (NSIndexPath *)validIndexPathNearToCenter
 {
@@ -98,5 +129,7 @@
 {
     return (self.tableView.frame.size.width - [self normalCellWidth]) / 2;// + (self.furtherScrollableWhenReachedEdge) * 80;
 }
+
+
 
 @end

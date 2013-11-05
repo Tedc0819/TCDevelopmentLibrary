@@ -28,4 +28,15 @@
 - (void)scrollToNextPageWithAnimation:(BOOL)animated;
 - (void)scrollToPreviousPageWithAnimation:(BOOL)animated;
 
+- (void)scrollToIndex:(NSUInteger)index setSelected:(BOOL)selected animated:(BOOL)animated;
+
+@end
+
+@protocol TCHoriTableViewAdapterDelegate<NSObject>
+
+@optional
+//- (void)tableView:(UITableView *) tableView WithAdapter:(TCHoriTableViewAdapter *) adapter didScrollToItem:(id) item ItemIndex:(NSUInteger) index;
+
+- (void)tableView:(UITableView *) tableView WithAdapter:(TCHoriTableViewAdapter *) adapter didSelectItem:(id) item ItemIndex:(NSUInteger) index;
+
 @end

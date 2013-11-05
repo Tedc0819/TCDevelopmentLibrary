@@ -21,15 +21,6 @@
     return _sharedManager;
 }
 
-- (NSMutableDictionary *)noticeDictionary
-{
-    static NSMutableDictionary *_noticeDict = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _noticeDict = [[NSMutableDictionary alloc] init];
-    });
-    return _noticeDict;
-}
 
 - (NSMutableDictionary *)noticeTypeDictionary
 {
@@ -41,15 +32,6 @@
     return _noticeTypeDict;
 }
 
-- (NSMutableDictionary *)noticeViewDictionary
-{
-    static NSMutableDictionary *_noticeViewDict = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _noticeViewDict = [[NSMutableDictionary alloc] init];
-    });
-    return _noticeViewDict;
-}
 
 - (void)showNoticeWithText:(NSString *)text Tag:(NSString *) tag Type:(TCNoticeType) type
 {
@@ -59,7 +41,6 @@
     notice.text = text;
     notice.type = type;
     [self addNotice:notice];
-    
     [self showLastestNoticeWithType:type];
 }
 
@@ -100,19 +81,97 @@
     }
 }
 
-- (void)addNotice:(TCNotice *)notice
+- (NSString *)noticeIdentifierWithType:(TCNoticeType)type
 {
-    if ([self isNoticeExist:notice.tag]) return;
+    return [self noticeViewClassStringWithType:type];
+}
 
-    NSString *noticeIdentifier = [self noticeIdentifierWithType:notice.type];
+- (void)refreshNoticeWithType:(TCNoticeType)type
+{
+    [self showLastestNoticeWithType:type];
+}
+
+#pragma mark - notice view related
+
+- (NSMutableDictionary *)noticeViewDictionary
+{
+    static NSMutableDictionary *_noticeViewDict = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _noticeViewDict = [[NSMutableDictionary alloc] init];
+    });
+    return _noticeViewDict;
+}
+
+- (TCNoticeView *)noticeViewWithType:(TCNoticeType)type
+{
+    NSString *noticeIdentifier = [self noticeIdentifierWithType:type];
     
-    [[self noticeDictionary]setValue:notice forKey:notice.tag];
+    TCNoticeView *noticeView = [self noticeViewDictionary][noticeIdentifier];
+    if (!noticeView || ![noticeView isKindOfClass:[TCNoticeView class]]) {
+        NSString *classString = [self noticeViewClassStringWithType:type];
+        noticeView = [[NSClassFromString(classString) alloc] init];
+        [[self noticeViewDictionary] setValue:noticeView forKey:noticeIdentifier];
+        UIViewController *viewCon = [[[[UIApplication sharedApplication]delegate] window] rootViewController];
+        [viewCon.view addSubview:noticeView];
+    }
+    return noticeView;
+}
+
+- (NSString *)noticeViewClassStringWithType:(TCNoticeType)type
+{
+    if (type==TCNoticeTypeNavigationBarBanner) return @"TCNavigationBarBannerNoticeView";
+    if (type==TCNoticeTypeNavigationBarBannerWarning) return @"TCNavigationBarBannerNoticeView";
+    return @"TCNoticeView";
+}
+
+#pragma mark - notice related
+
+- (NSMutableDictionary *)noticeDictionary
+{
+    static NSMutableDictionary *_noticeDict = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _noticeDict = [[NSMutableDictionary alloc] init];
+    });
+    return _noticeDict;
+}
+
+- (TCNotice *)noticeWithTag:(NSString *)tag
+{
+    return [self noticeDictionary][tag];
+}
+
+- (NSArray *)noticesWithType:(TCNoticeType)type //Public method
+{
+    NSString *noticeIdentifier = [self noticeIdentifierWithType:type];
+    return ((NSArray *)[self noticeTypeDictionary][noticeIdentifier]).copy;
+}
+
+- (NSMutableArray *)noticesArrayWithType:(TCNoticeType)type //Private Method for managing
+{
+    NSString *noticeIdentifier = [self noticeIdentifierWithType:type];
     
     NSMutableArray *tmpArray = [self noticeTypeDictionary][noticeIdentifier];
-    if (!tmpArray || ![tmpArray isKindOfClass:[NSArray class]]) {
+    if (!tmpArray || ![tmpArray isKindOfClass:[NSMutableArray class]]) {
         tmpArray = [[NSMutableArray alloc] init];
         [[self noticeTypeDictionary]setValue:tmpArray forKey:noticeIdentifier];
     }
+    return tmpArray;
+}
+
+- (BOOL)isNoticeExist:(NSString *) tag
+{
+    return [self noticeDictionary][tag] ? YES : NO;
+}
+
+- (void)addNotice:(TCNotice *)notice
+{
+    if ([self isNoticeExist:notice.tag]) return;
+    
+    [[self noticeDictionary]setValue:notice forKey:notice.tag];
+    
+    NSMutableArray *tmpArray = [self noticesArrayWithType:notice.type];
     [tmpArray addObject:notice];
     [self logStatus];
 }
@@ -131,53 +190,6 @@
     [self logStatus];
 }
 
-- (BOOL)isNoticeExist:(NSString *) tag
-{
-    return [self noticeDictionary][tag] ? YES : NO;
-}
-
-- (NSArray *)noticesWithType:(TCNoticeType)type
-{
-    NSString *noticeIdentifier = [self noticeIdentifierWithType:type];
-    return ((NSArray *)[self noticeTypeDictionary][noticeIdentifier]).copy;
-}
-
-- (TCNoticeView *)noticeViewWithType:(TCNoticeType)type
-{    
-    NSString *noticeIdentifier = [self noticeIdentifierWithType:type];
-    
-    TCNoticeView *noticeView = [self noticeViewDictionary][noticeIdentifier];
-    if (!noticeView || ![noticeView isKindOfClass:[TCNoticeView class]]) {
-        NSString *classString = [self noticeViewClassStringWithType:type];
-        noticeView = [[NSClassFromString(classString) alloc] init];
-        [[self noticeViewDictionary] setValue:noticeView forKey:noticeIdentifier];
-        UIViewController *viewCon = [[[[UIApplication sharedApplication]delegate] window] rootViewController];
-        [viewCon.view addSubview:noticeView];
-    }
-    return noticeView;
-}
-
-- (NSString *)noticeIdentifierWithType:(TCNoticeType)type
-{
-    return [self noticeViewClassStringWithType:type];
-}
-
-- (NSString *)noticeViewClassStringWithType:(TCNoticeType)type
-{
-    if (type==TCNoticeTypeNavigationBarBanner) return @"TCNavigationBarBannerNoticeView";
-    if (type==TCNoticeTypeNavigationBarBannerWarning) return @"TCNavigationBarBannerNoticeView";
-    return @"TCNoticeView";
-}
-
-- (void)refreshNoticeWithType:(TCNoticeType)type
-{
-    [self showLastestNoticeWithType:type];
-}
-
-- (TCNotice *)noticeWithTag:(NSString *)tag
-{
-    return [self noticeDictionary][tag];
-}
 
 - (void)logStatus
 {
