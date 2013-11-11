@@ -16,17 +16,22 @@
 {
     self = [self init];
     if (self) {
-        [self parsingDict:dict shouldOverwrite:YES];
+        [self parseDict:dict shouldOverwrite:YES];
     }
     return self;
 }
 
-- (void)parsingDict:(NSDictionary *)dict shouldOverwrite:(BOOL)shouldOberwrite
+- (void)parseDict:(NSDictionary *)dict shouldOverwrite:(BOOL)shouldOverwrite;
 {
     if (![dict isKindOfClass:[NSDictionary class]]) return;
     NSDictionary *sourceDict = [dict mappedDictionaryWithKeyMap:[self.class parsingMap]];
     NSDictionary *finalDict = [self dictionaryAfterParsedOwingObjectFromDictionary:sourceDict];
     [self setValueFromDictionary:finalDict shouldOverwrite:YES];
+}
+
+- (NSDictionary *)serializedDictionary
+{
+    return @{};
 }
 
 - (NSDictionary *)dictionaryAfterParsedOwingObjectFromDictionary:(NSDictionary *)sourceDict
@@ -89,6 +94,96 @@
 }
 
 //request related
++ (void)createObject:(TCJsonObject *)object WithCompletion:(void(^)(BOOL result, NSString *error,TCJsonObject *object))completion
+{
+//returning Dictionary should be like this
+//    @{ @"result" : YES/NO,
+//       @"error"  : @"error msg",
+//       singleResourceName : @"TCJsonObject"
+//    }
+    
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@",ResourcesHostPath, [self puralResourceString]];
+    NSURL *url = [NSURL URLWithString:urlStr];
+    NSDictionary *params = object.serializedDictionary;
+    NSDictionary *header = @{};
+    NSString *tag = [NSString stringWithFormat:@"%@_Create_%lu", [self singleResourceString], (unsigned long)object.hash];
+    
+    [TCRequest requestContent:TCRequestContentTypeDictionary
+                     ByMethod:TCRequestMethodPost
+                      FromURL:url
+                   WithParams:params
+                      headers:header
+                       AsType:TCRequestParamsTypeForm
+                          Tag:tag
+                   Completion:^(id returnObject) {
+                       TCJsonObject *object = [[self alloc] initWithDictionary:returnObject[[self singleResourceString]]];
+                       completion(((NSNumber *)returnObject[@"result"]).boolValue,returnObject[@"error"],object);
+                   }];
+}
+
++ (void)readObjectByID:(NSString *)ID WithCompletion:(void(^)(TCJsonObject *object))completion
+{
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@/%@",ResourcesHostPath, [self puralResourceString],ID];
+    NSURL *url = [NSURL URLWithString:urlStr];
+    [self getObjectFromURL:url
+             ParsingKeyPath:@[[self singleResourceString]]
+                 Completion:^(TCJsonObject *object) {
+                     completion(object);
+                 }
+    ];
+}
+
++ (void)updateObject:(TCJsonObject *)object WithCompletion:(void(^)(TCJsonObject *object))completion
+{
+    //returning Dictionary should be like this
+    //    @{ @"result" : YES/NO,
+    //       @"error"  : @"error msg",
+    //       singleResourceName : @"TCJsonObject"
+    //    }
+    
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@",ResourcesHostPath, [self puralResourceString]];
+    NSURL *url = [NSURL URLWithString:urlStr];
+    NSDictionary *params = object.serializedDictionary;
+    NSDictionary *header = @{};
+    NSString *tag = [NSString stringWithFormat:@"%@_Update_%lu", [self singleResourceString], (unsigned long)object.hash];
+    
+    [TCRequest requestContent:TCRequestContentTypeDictionary
+                     ByMethod:TCRequestMethodPut
+                      FromURL:url
+                   WithParams:params
+                      headers:header
+                       AsType:TCRequestParamsTypeForm
+                          Tag:tag
+                   Completion:^(id returnObject) {
+                       NSLog(@"returnObject = %@", returnObject);
+                   }];
+}
+
++ (void)destoryObject:(TCJsonObject *)object WithCompletion:(void(^)(TCJsonObject *object))completion
+{
+    //returning Dictionary should be like this
+    //    @{ @"result" : YES/NO,
+    //       @"error"  : @"error msg",
+    //       singleResourceName : @"TCJsonObject"
+    //    }
+    
+//    NSString *urlStr = [NSString stringWithFormat:@"%@%@",ResourcesHostPath, [self puralResourceString]];
+//    NSURL *url = [NSURL URLWithString:urlStr];
+//    NSDictionary *params = object.serializedDictionary;
+//    NSDictionary *header = @{};
+//    NSString *tag = [NSString stringWithFormat:@"%@_Create_%lu", [self singleResourceString], (unsigned long)object.hash];
+//    
+//    [TCRequest requestContent:TCRequestContentTypeDictionary
+//                     ByMethod:TCRequestMethodDelete
+//                      FromURL:url
+//                   WithParams:params
+//                      headers:header
+//                       AsType:TCRequestParamsTypeForm
+//                          Tag:tag
+//                   Completion:^(id returnObject) {
+//                       NSLog(@"returnObject = %@", returnObject);
+//                   }];
+}
 
 + (void)getObjectsFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath WithParamsType:(TCRequestParamsType)paramsType WithMethod:(TCRequestMethod)method WithParams:(NSDictionary *)params Completion:(void (^)(NSArray *))completion
 {
@@ -121,6 +216,39 @@
 + (void)getObjectsFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath Completion: (void(^)(NSArray *objects)) completion
 {
     [self getObjectsFromURL:url ParsingKeyPath:keyPath WithParamsType:TCRequestParamsTypeVariablePath WithMethod:TCRequestMethodGet WithParams:nil Completion:completion];
+}
+
++ (void)getObjectFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath WithParamsType:(TCRequestParamsType)paramsType WithMethod:(TCRequestMethod)method WithParams:(NSDictionary *)params Completion:(void (^)(TCJsonObject *object))completion
+{
+#ifdef NSJsonObjectShouldLogRequest
+    NSLog(@"Request From Server - %@ - START", [self class]);
+#endif
+    [TCRequest requestContent:TCRequestContentTypeDictionary ByMethod:method FromURL:url WithParams:params AsType:paramsType Tag:url.absoluteString Completion:^(id returnObject) {
+        NSDictionary *dict = (NSDictionary *)returnObject;
+        if (!dict) {
+#ifdef NSJsonObjectShouldLogRequest
+            NSLog(@"Request From Server - %@ - Fail - NO Dictionary", [self class]);
+#endif
+            completion(nil);
+            return;
+        }
+        
+        TCJsonObject *object = [[self alloc] initWithDictionary:dict];
+        
+#ifdef NSJsonObjectShouldLogRequest
+        if (!object) {
+            NSLog(@"Request From Server - %@ - Fail - NO ITEM", [self class]);
+        } else {
+            NSLog(@"Request From Server - %@ - SUCCESS", [self class]);
+        }
+#endif
+        completion(object);
+    }];
+}
+
++ (void)getObjectFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath Completion: (void(^)(TCJsonObject *object)) completion
+{
+    [self getObjectFromURL:url ParsingKeyPath:keyPath WithParamsType:TCRequestParamsTypeVariablePath WithMethod:TCRequestMethodGet WithParams:nil Completion:completion];
 }
 
 #pragma mark - others

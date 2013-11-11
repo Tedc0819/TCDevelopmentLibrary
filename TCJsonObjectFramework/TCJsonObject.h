@@ -16,25 +16,32 @@
 @property (nonatomic, strong) NSString *objID;
 @property (nonatomic, strong) NSDictionary *JSONDict;
 
+//must fill in
+
++ (NSString *)singleResourceString;
++ (NSString *)puralResourceString;
++ (NSDictionary *)parsingMap;
++ (NSDictionary *)hasOneRelationship; //@{ keyInRawDictionary : ClassObObject}
++ (NSDictionary *)hasManyRelationship; // @{ keyInRawDictionary : ClassObObject}
+
 //object related
 - (id)initWithDictionary:(NSDictionary *)dict;
-- (void)parsingDict:(NSDictionary *)dict shouldOverwrite:(BOOL)shouldOberwrite;
+- (void)parseDict:(NSDictionary *)dict shouldOverwrite:(BOOL)shouldOverwrite;
 
 - (void)saveWithCompletion:(void(^)(void)) completion;
 - (void)readWithCompletion:(void(^)(void)) completion;
 - (void)updateWithCompletion:(void(^)(void)) completion;
 - (void)destoryWithCompletion:(void(^)(void)) completion;
+- (NSDictionary *)serializedDictionary;
 
 //parsing related
 + (NSArray *)jsonObjectsFromArray:(NSArray *)array; //parsing Array of Objects
-+ (NSDictionary *)parsingMap;
-+ (NSDictionary *)hasOneRelationship; //@{ keyInRawDictionary : ClassObObject}
-+ (NSDictionary *)hasManyRelationship; // @{ keyInRawDictionary : ClassObObject}
+
 
 //request related
-
-+ (void)createObject:(TCJsonObject *)object WithCompletion:(void(^)(TCJsonObject *object))completion;
-+ (void)readObjectByID:(int)ID WithCompletion:(void(^)(TCJsonObject *object))completion;
++ (void)createObject:(TCJsonObject *)object
+      WithCompletion:(void(^)(BOOL result, NSString *error,TCJsonObject *object))completion;
++ (void)readObjectByID:(NSString *)ID WithCompletion:(void(^)(TCJsonObject *object))completion;
 + (void)updateObject:(TCJsonObject *)object WithCompletion:(void(^)(TCJsonObject *object))completion;
 + (void)destoryObject:(TCJsonObject *)object WithCompletion:(void(^)(TCJsonObject *object))completion;
 
@@ -47,6 +54,15 @@
                Completion:(void (^)(NSArray *objects))completion;
 
 + (void)getObjectsFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath Completion: (void(^)(NSArray *objects)) completion;
+
++ (void)getObjectFromURL:(NSURL *)url
+          ParsingKeyPath:(NSArray *)keyPath
+          WithParamsType:(TCRequestParamsType)paramsType
+              WithMethod:(TCRequestMethod)method
+              WithParams:(NSDictionary *)params
+              Completion:(void (^)(TCJsonObject *object))completion;
+
++ (void)getObjectFromURL:(NSURL *)url ParsingKeyPath:(NSArray *)keyPath Completion: (void(^)(TCJsonObject *object)) completion;
 
 @end
 
